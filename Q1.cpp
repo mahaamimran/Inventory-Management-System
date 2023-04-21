@@ -24,6 +24,7 @@ class PointofSale{
     int size;
     Product *cart;
     int cartItems;
+    int totalCost;
 public:
     PointofSale(int s=0);
     ~PointofSale();
@@ -34,16 +35,19 @@ public:
     void display();
     void addToCart();
     void applyDiscounts();
+    void issueRefund();
 };
 void subMenuInventory(InventoryManagement &I1);
 void subMenuPointofSale(PointofSale &P1);
 // Point of Sale Defined
 PointofSale::PointofSale(int s){
+    totalCost=0;
     size = s;
     products = new Product[size];
 }
 PointofSale::~PointofSale(){
     delete [] products;
+    delete [] cart;
 }
 Product PointofSale::get_product(int index){
     return products[index];
@@ -82,19 +86,50 @@ void PointofSale::addToCart(){
         if(index != -1){
             cout << "Enter the amount of "<<products[index].name<<" you'd like to buy: ";
             cin >> takenQuantity;
-            products[index].quantity -= takenQuantity;
-            cart[j].quantity = takenQuantity;
-            cart[j].price = products[index].price;
-             // displaying items in cart
-            cout<<"\nItems in cart: "<<endl;
-            cout<<"Name, Quantity, Price"<<endl;
-            for(int i=0; i<cartItems; i++){
-                cout<<"product "<<i+1<<": "<<cart[i].name<<", "<<cart[i].quantity<<", Rs."<<cart[i].price<<endl;
+            if(takenQuantity<products[index].quantity){
+             products[index].quantity -= takenQuantity;
+             cart[j].quantity = takenQuantity;
+             cart[j].price = products[index].price;
             }
-
+            else
+                cout<<"\nNot enough stock. Only "<<products[index].quantity<<" available."<<endl;
         }
         else cout << "Product not found in inventory." << endl;
     }
+        // displaying items in cart
+        cout<<"\nItems in cart: "<<endl;
+        cout<<"Name, Quantity, Price"<<endl;
+        for(int i=0; i<cartItems; i++){
+            cout<<"product "<<i+1<<": "<<cart[i].name<<", "<<cart[i].quantity<<", Rs."<<cart[i].price<<" each"<<endl;
+            totalCost+=cart[i].price*cart[i].quantity;
+        }
+        cout<<"Total: Rs."<<totalCost<<endl;
+
+}
+void PointofSale::applyDiscounts(){
+    // checking cart if eligible for discount
+    cout<<"available discounts: "<<endl;
+    cout<<"1. 10% discount on items with quantity of 3 or more"<<endl;
+    cout<<"2. 5% discount on total cost if total cost exceeds Rs.1000\n"<<endl;
+
+    // when quantity of item in cart is 3 or more, 10% discount is applied
+    int totalLocal=0;
+    for(int i=0;i<cartItems;i++){
+        if(cart[i].quantity>=3){
+            cout<<"You are eligible for a 10% discount on "<<cart[i].name<<" since the quantity exceeds 3"<<endl;
+            cout<<"Price before discount: Rs."<<cart[i].price<<endl;
+            cart[i].price-=cart[i].price*0.1;
+            cout<<"Price after discount: Rs."<<cart[i].price<<endl;
+            totalLocal+=cart[i].price*cart[i].quantity;
+        }
+    }
+    // checking if total cost exceeds 1000, if so, 5% discount is applied
+    if(totalCost>=1000){
+        cout<<"You are eligible for a 5% discount since the total cost exceeds Rs.1000"<<endl;
+        totalLocal-=totalLocal*0.05;
+    }
+    cout<<"Total before discount: Rs."<<totalCost<<endl;
+    cout<<"Total after discount: Rs."<<totalLocal<<endl;
 }
 
 
@@ -134,7 +169,7 @@ void InventoryManagement::productTake(){
     int index = -1;
     int takenQuantity;
     double takenPrice;
-    cout << "\nEnter the name of the product you want to take: ";
+    cout << "\nEnter the name of the product you want to update: ";
     cin >> productName;
     for(int i=0; i<size; i++){
         if(products[i].name == productName){
@@ -144,17 +179,16 @@ void InventoryManagement::productTake(){
     }
     // if the product is found, ask for the quantity and price taken and update the inventory
     if(index != -1){
-        cout << "Enter the quantity taken: ";
+        cout << "Enter the updated quantity of the product: ";
         cin >> takenQuantity;
         products[index].quantity -= takenQuantity;
-        cout << "Enter the price taken: ";
+        cout << "Enter the updated price of the product: ";
         cin >> takenPrice;
         products[index].price = takenPrice;
         cout << "Product inventory successfully updated" << endl;
     }
-    else{
-        cout << "Product not found in inventory." << endl;
-    }
+    else cout << "Product not found in inventory." << endl;
+    
 }
 void InventoryManagement::priceManagement(){
     cout<<"\nWelcome to the price management system!\n";
@@ -283,7 +317,7 @@ int main(){
                 // subMenu();
                 break;
             case -1:
-                cout<<"\nbyebye👋🏻\n\n";
+                cout<<"\nExiting Progam...\n\n";
                 break;
             default:
                 cout<<"Invalid choice!\n";
@@ -316,7 +350,7 @@ void subMenuInventory(InventoryManagement &I1){
             case 4:
                 I1.display();
             case -1:
-                cout<<"\nbyebye👋🏻\n\n";
+                cout<<"\nExiting Inventory Menu...\n\n";
                 break;
             default:
                 cout<<"\nInvalid choice\n"<<endl;
@@ -330,19 +364,25 @@ void subMenuPointofSale(PointofSale &P1){
         cout<<"\nWelcome to the Point of Sale Management System!\n";
         cout<<"\nWhat action would you like to perform?\n"<<endl;
         cout<<"1. Add to cart\n";
+        cout<<"2. Apply Discounts\n";
+        cout<<"3. Issue refund\n";
         cout<<"Enter -1 to exit\n"<<endl;
         cin>>choice;
         switch(choice){
             case 1:
                 P1.addToCart();
                 break;
+            case 2:
+                P1.applyDiscounts();
+                break;
+            case 3:
+                P1.issueRefund();
+                break;
             case -1:
-                cout<<"\nbyebye👋🏻\n\n";
+                cout<<"\nExiting Point of Sale Menu...\n\n";
                 break;
             default:
                 cout<<"\nInvalid choice\n"<<endl;
         }
-
-
     }
 }
