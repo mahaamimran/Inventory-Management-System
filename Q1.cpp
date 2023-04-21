@@ -37,6 +37,16 @@ public:
     void applyDiscounts();
     void issueRefund();
 };
+class Reportingsystem{
+public:
+    Reportingsystem();
+    ~Reportingsystem();
+    void salesReports();
+    void inventoryReports();
+    void profitReports();
+    
+};
+// Prototypes
 void subMenuInventory(InventoryManagement &I1);
 void subMenuPointofSale(PointofSale &P1);
 // Point of Sale Defined
@@ -130,6 +140,30 @@ void PointofSale::applyDiscounts(){
     }
     cout<<"Total before discount: Rs."<<totalCost<<endl;
     cout<<"Total after discount: Rs."<<totalLocal<<endl;
+}
+void PointofSale::issueRefund(){
+    // issue refund
+    cout<<"What item would you like to return?"<<endl;
+    string productNameLocal;
+    cin>>productNameLocal;
+    for(int i=0;i<cartItems;i++){
+        if(cart[i].name==productNameLocal){
+            cout<<"Enter the quantity of "<<cart[i].name<<" you would like to return: ";
+            int quantityLocal;
+            cin>>quantityLocal;
+            if(quantityLocal<=cart[i].quantity){
+                // updating cart
+                cart[i].quantity-=quantityLocal;
+                // updating inventory
+                products[i].quantity+=quantityLocal;
+                cout<<"Refund issued for Rs."<<cart[i].price*quantityLocal<<endl;
+            }
+            
+            else
+                cout<<"You can only return "<<cart[i].quantity<<" of "<<cart[i].name<<endl; 
+        }
+        else cout<<"Item not found in cart"<<endl;
+    }
 }
 
 
