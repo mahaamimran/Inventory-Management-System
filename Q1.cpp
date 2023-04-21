@@ -7,6 +7,7 @@ struct Product{
     double price;
 };
 class InventoryManagement{
+protected:
     Product *products;
     int size;
 public:
@@ -19,9 +20,7 @@ public:
     void productTake();
     void priceManagement();
 };
-class PointofSale{
-    Product *products;
-    int size;
+class PointofSale:public InventoryManagement{
     Product *cart;
     int cartItems;
     int totalCost;
@@ -54,9 +53,9 @@ PointofSale::PointofSale(int s){
     totalCost=0;
     size = s;
     products = new Product[size];
+    cart = nullptr;
 }
 PointofSale::~PointofSale(){
-    delete [] products;
     delete [] cart;
 }
 Product PointofSale::get_product(int index){
@@ -74,7 +73,7 @@ void PointofSale::display(){
 }
 void PointofSale::addToCart(){
     // add to cart
-    cout<<"How many items would you like to buy?";
+    cout<<"How many items would you like to buy?\n";
     cin>>cartItems;
     cart = new Product[cartItems];
     for(int j=0;j<cartItems;j++){
@@ -117,29 +116,43 @@ void PointofSale::addToCart(){
 
 }
 void PointofSale::applyDiscounts(){
-    // checking cart if eligible for discount
-    cout<<"available discounts: "<<endl;
-    cout<<"1. 10% discount on items with quantity of 3 or more"<<endl;
-    cout<<"2. 5% discount on total cost if total cost exceeds Rs.1000\n"<<endl;
+    if(cart!=NULL){
+        // checking cart if eligible for discount
+        cout<<"available discounts: "<<endl;
+        cout<<"1. 10% discount on items with quantity of 3 or more"<<endl;
+        cout<<"2. 5% discount on total cost if total cost exceeds Rs.1000\n"<<endl;
 
-    // when quantity of item in cart is 3 or more, 10% discount is applied
-    int totalLocal=0;
-    for(int i=0;i<cartItems;i++){
-        if(cart[i].quantity>=3){
-            cout<<"You are eligible for a 10% discount on "<<cart[i].name<<" since the quantity exceeds 3"<<endl;
-            cout<<"Price before discount: Rs."<<cart[i].price<<endl;
-            cart[i].price-=cart[i].price*0.1;
-            cout<<"Price after discount: Rs."<<cart[i].price<<endl;
-            totalLocal+=cart[i].price*cart[i].quantity;
+        // when quantity of item in cart is 3 or more, 10% discount is applied
+        int totalLocal=0;
+        for(int i=0;i<cartItems;i++){
+            if(cart[i].quantity>=3){
+                cout<<"You are eligible for a 10% discount on "<<cart[i].name<<endl;
+                cout<<"Price before discount: Rs."<<cart[i].price<<endl;
+                cart[i].price-=cart[i].price*0.1;
+                cout<<"Price after discount: Rs."<<cart[i].price<<endl;
+                totalLocal+=cart[i].price*cart[i].quantity;
+            }
+            else {
+                totalLocal=totalCost;
+                cout<<"you are not eligible for a 10% discount on "<<cart[i].name<<endl;
+            }
         }
-    }
     // checking if total cost exceeds 1000, if so, 5% discount is applied
     if(totalCost>=1000){
         cout<<"You are eligible for a 5% discount since the total cost exceeds Rs.1000"<<endl;
         totalLocal-=totalLocal*0.05;
     }
-    cout<<"Total before discount: Rs."<<totalCost<<endl;
-    cout<<"Total after discount: Rs."<<totalLocal<<endl;
+    else {
+        cout<<"You are not eligible for a 5% discount since the total cost is less than Rs.1000"<<endl;
+    }
+
+        if(totalCost!=totalLocal){
+            cout<<"Total before discount: Rs."<<totalCost<<endl;
+            cout<<"Total after discount: Rs."<<totalLocal<<endl;
+        }
+        else cout<<"You're not eligible for any discount. ziada cheezain leni thin\n";
+    }
+    else cout<<"add items to cart first\n";
 }
 void PointofSale::issueRefund(){
     // issue refund
@@ -262,6 +275,7 @@ void InventoryManagement::priceManagement(){
             cout<<"4. Specific amount discount\n";
             cout<<"5. Rs. 20 discount on all products\n";
             int choice=0;
+            cin>>choice;
             if(choice==1){
                 double discount;
                 cout<<"Enter the discount percentage: ";
@@ -273,13 +287,13 @@ void InventoryManagement::priceManagement(){
             }
             else if(choice==2){
                 for(int i=0;i<size;i++){
-                    products[i].price = products[i].price - (products[i].price * (50/100));
+                    products[i].price = products[i].price - (products[i].price * (50/100.0));
                 }
                 cout<<"50% discount applied successfully!"<<endl;
             }
             else if(choice==3){
                 for(int i=0;i<size;i++){
-                    products[i].price = products[i].price - (products[i].price * (25/100));
+                    products[i].price = products[i].price - (products[i].price * (25/100.0));
                 }
                 cout<<"25% discount applied successfully!"<<endl;
             }
@@ -329,8 +343,12 @@ int main(){
     // assigning products to inventory, point of sale
     for(int i=0; i<50; i++){
         I1.set_product(i,p[i]);
-        P1.set_product(i,p[i]);
     }
+    for(int i=0;i<50;i++){
+        // aggregation
+        P1.set_product(i,I1.get_product(i));
+    }
+    
     // who are you
     int choice=0;
     while(choice!=-1){
@@ -347,9 +365,9 @@ int main(){
             case 2:
                 subMenuPointofSale(P1);
                 break;
-            case 3:
+            //case 3:
                 // subMenu();
-                break;
+               // break;
             case -1:
                 cout<<"\nExiting Progam...\n\n";
                 break;
@@ -400,6 +418,7 @@ void subMenuPointofSale(PointofSale &P1){
         cout<<"1. Add to cart\n";
         cout<<"2. Apply Discounts\n";
         cout<<"3. Issue refund\n";
+        cout<<"4. Display Products\n";
         cout<<"Enter -1 to exit\n"<<endl;
         cin>>choice;
         switch(choice){
@@ -411,6 +430,9 @@ void subMenuPointofSale(PointofSale &P1){
                 break;
             case 3:
                 P1.issueRefund();
+                break;
+            case 4:
+                P1.display();
                 break;
             case -1:
                 cout<<"\nExiting Point of Sale Menu...\n\n";
