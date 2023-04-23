@@ -1,4 +1,6 @@
+// Maham_F_22i-2733_Assignment_4
 // cash and carry management system
+// instructions for example input at the end
 #include <iostream>
 #include <ctime>
 using namespace std;
@@ -32,6 +34,10 @@ public:
     ~PointofSale();
     Product get_cart(int index);
     void set_cart(int index, Product p);
+    string get_date(int index);
+    void set_date(int index, string d);
+    int get_cartItems();
+    void set_cartItems(int c);
     void display();
     void addToCart();
     void applyDiscounts();
@@ -50,175 +56,9 @@ public:
 void subMenuInventory(InventoryManagement &I1);
 void subMenuPointofSale(PointofSale &P1);
 void subMenuReportingSystem(ReportingSystem &R1);
-
-// Reporting System Defined
-ReportingSystem::ReportingSystem(int s){
-    size = s;
-    products = new Product[size];
-}
-ReportingSystem::~ReportingSystem(){
-}
-void ReportingSystem::salesReport(){
-    // sales report
-    cout<<"Which view would you like to see?\n";
-    cout<<"Sales by Product\n";
-    cout<<"Sales by Date\n";
-    cout<<"Sales by Customer\n";
-    int choice;
-    cin>>choice;
-    switch(choice){
-        case 1:
-            // sales by product
-            break;
-        case 2:
-            // sales by date
-            break;
-        case 3:
-            // sales by customer
-            break;
-        default:
-            cout<<"Invalid choice. Please try again."<<endl;
-    }
-}
-void ReportingSystem::inventoryReport(){
-    // inventory report
-}
-void ReportingSystem::profitReport(){
-    // profit report
-}
-
-// Point of Sale Defined
-PointofSale::PointofSale(int s){
-    totalCost=0;
-    size = s;
-    products = new Product[size];
-    cart = nullptr;
-    date = nullptr;
-}
-PointofSale::~PointofSale(){
-    delete [] cart;
-}
-void PointofSale::display(){
-    cout<<"\nInventory: "<<endl;
-    cout<<"Name, Quantity, Price"<<endl;
-    for(int i=0; i<size; i++){
-        cout<<"product "<<i+1<<": "<<products[i].name<<", "<<products[i].quantity<<", Rs."<<products[i].price<<endl;
-    }
-}
-void PointofSale::addToCart(){
-    // add to cart
-    cout<<"How many items would you like to buy?\n";
-    cin>>cartItems;
-    cart = new Product[cartItems];
-    date = new string[cartItems];
-    for(int j=0;j<cartItems;j++){
-        // saving the date
-        time_t now = time(0);
-        date[j] = ctime(&now);
-         // update inventory
-        string productName;
-        int index = -1;
-        int takenQuantity;
-        // dynmaically allocating  memory of cart based on how many items user wants to buy
-        cout << "\nEnter the name of the product you want to buy: ";
-        cin >> productName;
-        for(int i=0; i<size; i++){
-            if(products[i].name == productName){
-                index = i;
-                cart[j].name = products[i].name;
-                break;
-            }
-        }
-        // if the product is found, ask for the quantity and price taken and update the inventory
-        if(index != -1){
-            cout << "Enter the amount of "<<products[index].name<<" you'd like to buy: ";
-            cin >> takenQuantity;
-            if(takenQuantity<products[index].quantity){
-             products[index].quantity -= takenQuantity;
-             cart[j].quantity = takenQuantity;
-             cart[j].price = products[index].price;
-            }
-            else
-                cout<<"\nNot enough stock. Only "<<products[index].quantity<<" available."<<endl;
-        }
-        else cout << "Product not found in inventory." << endl;
-    }
-        // displaying items in cart
-        cout<<"\nItems in cart: "<<endl;
-        cout<<"Name, Quantity, Price"<<endl;
-        for(int i=0; i<cartItems; i++){
-            cout<<"product "<<i+1<<": "<<cart[i].name<<", "<<cart[i].quantity<<", Rs."<<cart[i].price<<" each"<<endl;
-            totalCost+=cart[i].price*cart[i].quantity;
-            cout<<"Date & Time: "<<date[i]<<endl;
-        }
-        cout<<"Total: Rs."<<totalCost<<endl;
-
-}
-void PointofSale::applyDiscounts(){
-    if(cart!=NULL){
-        // checking cart if eligible for discount
-        cout<<"available discounts: "<<endl;
-        cout<<"1. 10% discount on items with quantity of 3 or more"<<endl;
-        cout<<"2. 5% discount on total cost if total cost exceeds Rs.1000\n"<<endl;
-
-        // when quantity of item in cart is 3 or more, 10% discount is applied
-        int totalLocal=0;
-        for(int i=0;i<cartItems;i++){
-            if(cart[i].quantity>=3){
-                cout<<"You are eligible for a 10% discount on "<<cart[i].name<<endl;
-                cout<<"Price before discount: Rs."<<cart[i].price<<endl;
-                cart[i].price-=cart[i].price*0.1;
-                cout<<"Price after discount: Rs."<<cart[i].price<<endl;
-                totalLocal+=cart[i].price*cart[i].quantity;
-            }
-            else {
-                totalLocal=totalCost;
-                cout<<"you are not eligible for a 10% discount on "<<cart[i].name<<endl;
-            }
-        }
-    // checking if total cost exceeds 1000, if so, 5% discount is applied
-    if(totalCost>=1000){
-        cout<<"You are eligible for a 5% discount since the total cost exceeds Rs.1000"<<endl;
-        totalLocal-=totalLocal*0.05;
-    }
-    else {
-        cout<<"You are not eligible for a 5% discount since the total cost is less than Rs.1000"<<endl;
-    }
-
-        if(totalCost!=totalLocal){
-            cout<<"Total before discount: Rs."<<totalCost<<endl;
-            cout<<"Total after discount: Rs."<<totalLocal<<endl;
-        }
-        else cout<<"You're not eligible for any discount. ziada cheezain leni thin\n";
-    }
-    else cout<<"add items to cart first\n";
-}
-void PointofSale::issueRefund(){
-    // issue refund
-    cout<<"What item would you like to return?"<<endl;
-    string productNameLocal;
-    cin>>productNameLocal;
-    for(int i=0;i<cartItems;i++){
-        if(cart[i].name==productNameLocal){
-            cout<<"Enter the quantity of "<<cart[i].name<<" you would like to return: ";
-            int quantityLocal;
-            cin>>quantityLocal;
-            if(quantityLocal<=cart[i].quantity){
-                // updating cart
-                cart[i].quantity-=quantityLocal;
-                // updating inventory
-                products[i].quantity+=quantityLocal;
-                cout<<"Refund issued for Rs."<<cart[i].price*quantityLocal<<endl;
-            }
-            
-            else
-                cout<<"You can only return "<<cart[i].quantity<<" of "<<cart[i].name<<endl;
-        }
-        else cout<<"Item not found in cart"<<endl;
-    }
-}
-
-
+// IMPLEMENT THIS AT THE END
+void mainMenu(InventoryManagement &I1, PointofSale &P1, ReportingSystem &R1);
+    
 // Inventoey Management System Defined
 InventoryManagement::InventoryManagement(int s){
     size = s;
@@ -274,7 +114,6 @@ void InventoryManagement::productTake(){
         cout << "Product inventory successfully updated" << endl;
     }
     else cout << "Product not found in inventory." << endl;
-    
 }
 void InventoryManagement::priceManagement(){
     cout<<"\nWelcome to the price management system!\n";
@@ -360,6 +199,201 @@ void InventoryManagement::priceManagement(){
         }
     }
 }
+// Point of Sale Defined
+PointofSale::PointofSale(int s){
+    totalCost=0;
+    size = s;
+    products = new Product[size];
+}
+PointofSale::~PointofSale(){
+    delete [] cart;
+    delete [] date;
+}
+void PointofSale::display(){
+    cout<<"\nInventory: "<<endl;
+    cout<<"Name, Quantity, Price"<<endl;
+    for(int i=0; i<size; i++){
+        cout<<"product "<<i+1<<": "<<products[i].name<<", "<<products[i].quantity<<", Rs."<<products[i].price<<endl;
+    }
+}
+Product PointofSale::get_cart(int index){
+    return cart[index];
+}
+void PointofSale::set_cart(int index, Product p){
+    cart[index] = p;
+}
+string PointofSale::get_date(int index){
+    return date[index];
+}
+void PointofSale::set_date(int index, string d){
+    date[index] = d;
+}
+int PointofSale::get_cartItems(){
+    return cartItems;
+}
+void PointofSale::set_cartItems(int c){
+    cartItems = c;
+}
+
+void PointofSale::addToCart(){
+    // add to cart
+    cout<<"How many items would you like to buy?\n";
+    cin>>cartItems;
+    cart = new Product[cartItems];
+    date = new string[cartItems];
+    for(int j=0;j<cartItems;j++){
+        // saving the date
+        time_t now = time(0);
+        date[j] = ctime(&now);
+         // update inventory
+        string productName;
+        int index = -1;
+        int takenQuantity;
+        // dynmaically allocating  memory of cart based on how many items user wants to buy
+        cout << "\nEnter the name of the product you want to buy: ";
+        cin >> productName;
+        for(int i=0; i<size; i++){
+            if(products[i].name == productName){
+                index = i;
+                cart[j].name = products[i].name;
+                break;
+            }
+        }
+        // if the product is found, ask for the quantity and price taken and update the inventory
+        if(index != -1){
+            cout << "Enter the amount of "<<products[index].name<<" you'd like to buy: ";
+            cin >> takenQuantity;
+            if(takenQuantity<products[index].quantity){
+             products[index].quantity -= takenQuantity;
+             cart[j].quantity = takenQuantity;
+             cart[j].price = products[index].price;
+            }
+            else
+                cout<<"\nNot enough stock. Only "<<products[index].quantity<<" available."<<endl;
+        }
+        else cout << "Product not found in inventory." << endl;
+    }
+        // displaying items in cart
+        cout<<"\nItems in cart: "<<endl;
+        cout<<"Name, Quantity, Price"<<endl;
+        for(int i=0; i<cartItems; i++){
+            cout<<"product "<<i+1<<": "<<cart[i].name<<", "<<cart[i].quantity<<", Rs."<<cart[i].price<<" each"<<endl;
+            totalCost+=cart[i].price*cart[i].quantity;
+            cout<<"Date & Time: "<<date[i]<<endl;
+        }
+        cout<<"Total: Rs."<<totalCost<<endl;
+}
+void PointofSale::applyDiscounts(){
+    if(cart!=NULL){
+        // checking cart if eligible for discount
+        cout<<"available discounts: "<<endl;
+        cout<<"1. 10% discount on items with quantity of 3 or more"<<endl;
+        cout<<"2. 5% discount on total cost if total cost exceeds Rs.1000\n"<<endl;
+
+        // when quantity of item in cart is 3 or more, 10% discount is applied
+        int totalLocal=0;
+        for(int i=0;i<cartItems;i++){
+            if(cart[i].quantity>=3){
+                cout<<"You are eligible for a 10% discount on "<<cart[i].name<<endl;
+                cout<<"Price before discount: Rs."<<cart[i].price<<endl;
+                cart[i].price-=cart[i].price*0.1;
+                cout<<"Price after discount: Rs."<<cart[i].price<<endl;
+                totalLocal+=cart[i].price*cart[i].quantity;
+            }
+            else {
+                totalLocal=totalCost;
+                cout<<"you are not eligible for a 10% discount on "<<cart[i].name<<endl;
+            }
+        }
+    // checking if total cost exceeds 1000, if so, 5% discount is applied
+    if(totalCost>=1000){
+        cout<<"You are eligible for a 5% discount since the total cost exceeds Rs.1000"<<endl;
+        totalLocal-=totalLocal*0.05;
+    }
+    else {
+        cout<<"You are not eligible for a 5% discount since the total cost is less than Rs.1000"<<endl;
+    }
+
+        if(totalCost!=totalLocal){
+            cout<<"Total before discount: Rs."<<totalCost<<endl;
+            cout<<"Total after discount: Rs."<<totalLocal<<endl;
+        }
+        else cout<<"You're not eligible for any discount. ziada cheezain leni thin\n";
+    }
+    else cout<<"add items to cart first\n";
+}
+void PointofSale::issueRefund(){
+    // issue refund
+    cout<<"What item would you like to return?"<<endl;
+    string productNameLocal;
+    cin>>productNameLocal;
+    for(int i=0;i<cartItems;i++){
+        if(cart[i].name==productNameLocal){
+            cout<<"Enter the quantity of "<<cart[i].name<<" you would like to return: ";
+            int quantityLocal;
+            cin>>quantityLocal;
+            if(quantityLocal<=cart[i].quantity){
+                // updating cart
+                cart[i].quantity-=quantityLocal;
+                // updating inventory
+                products[i].quantity+=quantityLocal;
+                cout<<"Refund issued for Rs."<<cart[i].price*quantityLocal<<endl;
+            }
+            
+            else
+                cout<<"You can only return "<<cart[i].quantity<<" of "<<cart[i].name<<endl;
+        }
+        else cout<<"Item not found in cart"<<endl;
+    }
+}
+
+// Reporting System Defined
+ReportingSystem::ReportingSystem(int s){
+    size = s;
+    products = new Product[size];
+    //cart = new cart[cartItems];
+}
+ReportingSystem::~ReportingSystem(){
+    // deallocate any runtime memory
+}
+void ReportingSystem::salesReport(){
+    // sales report
+    cout<<"Which view would you like to see?\n";
+    cout<<"1. Sales by Product\n";
+    cout<<"2. Sales by Date\n";
+    cout<<"3. Sales by Customer\n";
+    int choice;
+    cin>>choice;
+    switch(choice){
+        case 1:{
+            // sales by product
+            cout<<"Sales by Product"<<endl;
+            for(int i=0;i<size;i++){
+                cout<<"Product "<<i+1<<": "<<products[i].name<<", "<<products[i].quantity<<", Rs."<<products[i].price<<endl;
+               
+               cout<<"the peasant way "<<cartItems<<endl;
+               set_cartItems(2);
+               cout<<"the getetr "<<get_cartItems()<<endl;
+            }
+            break;
+        }
+        case 2:
+            // sales by date
+            break;
+        case 3:
+            // sales by customer
+            break;
+        default:
+            cout<<"Invalid choice. Please try again."<<endl;
+    }
+}
+void ReportingSystem::inventoryReport(){
+    // inventory report
+}
+void ReportingSystem::profitReport(){
+    // profit report
+}
+
 
 
 int main(){
