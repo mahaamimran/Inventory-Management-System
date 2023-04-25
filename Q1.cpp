@@ -18,6 +18,8 @@ public:
     ~InventoryManagement();
     Product get_product(int index);
     void set_product(int index, Product p);
+    void set_size(int s);
+    int get_size();
     void display();
     void productOrdering();
     void productTake();
@@ -38,7 +40,6 @@ public:
     void set_date(int index, string d);
     int get_cartItems();
     void set_cartItems(int c);
-    void display();
     void addToCart();
     void applyDiscounts();
     void issueRefund();
@@ -72,6 +73,12 @@ Product InventoryManagement::get_product(int index){
 }
 void InventoryManagement::set_product(int index, Product p){
     products[index] = p;
+}
+void InventoryManagement::set_size(int s){
+    size = s;
+}
+int InventoryManagement::get_size(){
+    return size;
 }
 void InventoryManagement::display(){
     cout<<"\nInventory: "<<endl;
@@ -204,17 +211,12 @@ PointofSale::PointofSale(int s){
     totalCost=0;
     size = s;
     products = new Product[size];
+   // cart = new Product[cartItems];
+   // date = new string[cartItems];
 }
 PointofSale::~PointofSale(){
     delete [] cart;
     delete [] date;
-}
-void PointofSale::display(){
-    cout<<"\nInventory: "<<endl;
-    cout<<"Name, Quantity, Price"<<endl;
-    for(int i=0; i<size; i++){
-        cout<<"product "<<i+1<<": "<<products[i].name<<", "<<products[i].quantity<<", Rs."<<products[i].price<<endl;
-    }
 }
 Product PointofSale::get_cart(int index){
     return cart[index];
@@ -371,9 +373,7 @@ void ReportingSystem::salesReport(){
             for(int i=0;i<size;i++){
                 cout<<"Product "<<i+1<<": "<<products[i].name<<", "<<products[i].quantity<<", Rs."<<products[i].price<<endl;
                
-               cout<<"the peasant way "<<cartItems<<endl;
-               set_cartItems(2);
-               cout<<"the getetr "<<get_cartItems()<<endl;
+               cout<<"amount of items in your cart: "<<cartItems<<endl;
             }
             break;
         }
@@ -412,11 +412,11 @@ int main(){
     };
     // inventory + product w 50 products
     InventoryManagement I1(50);
-    PointofSale P1(50);
-    ReportingSystem R1(50);
+    PointofSale P1(I1.get_size());
+    ReportingSystem R1(I1.get_size());
    
     // assigning products to inventory, point of sale
-    for(int i=0; i<50; i++){
+    for(int i=0; i<I1.get_size(); i++){
         I1.set_product(i,p[i]);
     }
     for(int i=0;i<50;i++){
@@ -437,9 +437,11 @@ int main(){
             case 1:
                 subMenuInventory(I1);
                 break;
-            case 2:
+            case 2:{
                 subMenuPointofSale(P1);
+                R1.set_cartItems(P1.get_cartItems());
                 break;
+            }
             case 3:
                 subMenuReportingSystem(R1);
                 break;
