@@ -32,7 +32,7 @@ protected:
     int totalCost;
     string *date;
 public:
-    PointofSale(int s=0);
+    PointofSale();
     ~PointofSale();
     Product get_cart(int index);
     void set_cart(int index, Product p);
@@ -43,10 +43,11 @@ public:
     void addToCart();
     void applyDiscounts();
     void issueRefund();
+    bool isNull();
 };
 class ReportingSystem:public PointofSale{
 public:
-    ReportingSystem(int s=0);
+    ReportingSystem();
     ~ReportingSystem();
     void salesReport();
     void inventoryReport();
@@ -57,9 +58,8 @@ public:
 void subMenuInventory(InventoryManagement &I1);
 void subMenuPointofSale(PointofSale &P1);
 void subMenuReportingSystem(ReportingSystem &R1);
-// IMPLEMENT THIS AT THE END
-void mainMenu(InventoryManagement &I1, PointofSale &P1, ReportingSystem &R1);
-    
+
+
 // Inventoey Management System Defined
 InventoryManagement::InventoryManagement(int s){
     size = s;
@@ -76,6 +76,7 @@ void InventoryManagement::set_product(int index, Product p){
 }
 void InventoryManagement::set_size(int s){
     size = s;
+    products = new Product[size];
 }
 int InventoryManagement::get_size(){
     return size;
@@ -206,13 +207,13 @@ void InventoryManagement::priceManagement(){
         }
     }
 }
+
 // Point of Sale Defined
-PointofSale::PointofSale(int s){
+PointofSale::PointofSale(){
     totalCost=0;
-    size = s;
-    products = new Product[size];
-   // cart = new Product[cartItems];
-   // date = new string[cartItems];
+    cartItems=0;
+    cart = nullptr;
+    date = nullptr;
 }
 PointofSale::~PointofSale(){
     delete [] cart;
@@ -235,6 +236,8 @@ int PointofSale::get_cartItems(){
 }
 void PointofSale::set_cartItems(int c){
     cartItems = c;
+    cart = new Product[cartItems];
+    date = new string[cartItems];
 }
 
 void PointofSale::addToCart(){
@@ -345,56 +348,87 @@ void PointofSale::issueRefund(){
             else
                 cout<<"You can only return "<<cart[i].quantity<<" of "<<cart[i].name<<endl;
         }
-        else cout<<"Item not found in cart"<<endl;
+        // else cout<<"Item not found in cart"<<endl;
     }
 }
-
+bool PointofSale::isNull(){
+    if(cart!=nullptr&&date!=nullptr)return false;
+    return true;
+}
 // Reporting System Defined
-ReportingSystem::ReportingSystem(int s){
-    size = s;
-    products = new Product[size];
-    //cart = new cart[cartItems];
+ReportingSystem::ReportingSystem(){
+    cartItems=0;
+    // no dynamically allocated stuff
+    cout<<"reporting system object created\n";
 }
 ReportingSystem::~ReportingSystem(){
-    // deallocate any runtime memory
+    // no deallocation
 }
 void ReportingSystem::salesReport(){
     // sales report
-    cout<<"Which view would you like to see?\n";
-    cout<<"1. Sales by Product\n";
-    cout<<"2. Sales by Date\n";
-    cout<<"3. Sales by Customer\n";
-    int choice;
-    cin>>choice;
-    switch(choice){
-        case 1:{
-            // sales by product
-            cout<<"Sales by Product"<<endl;
-            for(int i=0;i<size;i++){
-                cout<<"Product "<<i+1<<": "<<products[i].name<<", "<<products[i].quantity<<", Rs."<<products[i].price<<endl;
-               
-               cout<<"amount of items in your cart: "<<cartItems<<endl;
-            }
-            break;
-        }
-        case 2:
-            // sales by date
-            break;
-        case 3:
-            // sales by customer
-            break;
-        default:
-            cout<<"Invalid choice. Please try again."<<endl;
-    }
-}
+       cout<<"Which view would you like to see?\n";
+       cout<<"1. Sales by Product\n";
+       cout<<"2. Sales by Date\n";
+       cout<<"3. Sales by Customer\n";
+       int choice;
+       cin>>choice;
+       switch(choice){
+           case 1:{
+               // sales by product
+               for(int i=0;i<cartItems;i++){
+                   cout<<"product: "<<cart[i].name<<endl;
+                   cout<<"quantity sold: "<<cart[i].quantity<<endl;
+                   cout<<"price sold at: "<<cart[i].price<<endl;
+                   cout<<"_____________________"<<endl;
+               }
+               break;
+           }
+           case 2:{
+               // sales by date
+               for(int i=0;i<cartItems;i++){
+                   cout<<"Date: "<<date[i]<<endl;
+                   cout<<"product: "<<cart[i].name<<endl;
+                   cout<<"quantity sold: "<<cart[i].quantity<<endl;
+                   cout<<"price sold at: "<<cart[i].price<<endl;
+                   cout<<"_____________________"<<endl;
+               }
+              
+               break;
+           }
+           case 3:{
+               // sales by customer
+               cout<<"Items customer 1 bought: "<<endl;
+               for(int i=0;i<cartItems;i++){
+                   cout<<"product: "<<cart[i].name<<endl;
+                   cout<<"quantity bought: "<<cart[i].quantity<<endl;
+                   cout<<"price bought at: "<<cart[i].price<<endl;
+               }
+          
+           }
+               break;
+           default:
+               cout<<"Invalid choice. Please try again."<<endl;
+       }
+   }
 void ReportingSystem::inventoryReport(){
     // inventory report
+        cout<<"Inventory Report"<<endl;
+        cout<<"Product No.\tName\tQuantity Left\tPrice"<<endl;
+        for(int i=0;i<size;i++){
+            cout<<i+1<<"\t\t\t"<<products[i].name<<"\t\t"<<products[i].quantity<<"\t\t\tRs."<<products[i].price<<endl;
+        }
 }
 void ReportingSystem::profitReport(){
     // profit report
+       cout<<"Profit Report"<<endl;
+       // each product gives 5% profit
+       double totalProfit=0;
+       for(int i=0;i<size;i++){
+           cout<<"Profit from "<<products[i].name<<": Rs."<<products[i].price*0.05<<endl;
+           totalProfit+=products[i].price*0.05;
+       }
+       cout<<"Total Profit: Rs."<<totalProfit<<endl;
 }
-
-
 
 int main(){
     // product initialization
@@ -412,18 +446,18 @@ int main(){
     };
     // inventory + product w 50 products
     InventoryManagement I1(50);
-    PointofSale P1(I1.get_size());
-    ReportingSystem R1(I1.get_size());
+    PointofSale P1;
+    P1.set_size(I1.get_size());
+    ReportingSystem R1;
+    R1.set_size(I1.get_size());
    
     // assigning products to inventory, point of sale
     for(int i=0; i<I1.get_size(); i++){
         I1.set_product(i,p[i]);
+        P1.set_product(i,p[i]);
+        R1.set_product(i,p[i]);
     }
-    for(int i=0;i<50;i++){
-        // aggregation
-        P1.set_product(i,I1.get_product(i));
-        R1.set_product(i,I1.get_product(i));
-    }
+   
     // whoMST are you
     int choice=0;
     while(choice!=-1){
@@ -432,19 +466,42 @@ int main(){
     cout<<"2. Point of Sale\n";
     cout<<"3. Report Generator\n";
     cout<<"Enter -1 to exit\n";
+    // when -1 is presssed on any menu, items in other objects are automatically updated
         cin>>choice;
         switch(choice){
-            case 1:
+            case 1:{
                 subMenuInventory(I1);
-                break;
-            case 2:{
-                subMenuPointofSale(P1);
-                R1.set_cartItems(P1.get_cartItems());
+                // aggregation
+                for(int i=0;i<50;i++){
+                // assigning updated product values incase discount applied
+                    P1.set_product(i,I1.get_product(i));
+                    R1.set_product(i,I1.get_product(i));
+                }
                 break;
             }
-            case 3:
+            case 2:{
+                subMenuPointofSale(P1);
+                // preparing reporting system object
+                R1.set_cartItems(P1.get_cartItems());
+              //  R1.set_size(P1.get_size());
+                if(P1.isNull()==false){
+                    // updating reporting system object
+                    for(int i=0;i<P1.get_cartItems();i++){
+                        // assignment to the other object
+                        R1.set_cart(i,P1.get_cart(i));
+                        R1.set_date(i,P1.get_date(i));
+                        
+                    }
+                    
+                }
+                else cout<<"nothing is in  your cart\n";
+                
+                break;
+            }
+            case 3:{
                 subMenuReportingSystem(R1);
                 break;
+            }
             case -1:
                 cout<<"\nExiting Progam...\n\n";
                 break;
@@ -534,10 +591,10 @@ void subMenuReportingSystem(ReportingSystem &R1){
             R1.salesReport();
             break;
         case 2:
-           // R1.inventoryReport();
+            R1.inventoryReport();
             break;
         case 3:
-          //  R1.profitReport();
+            R1.profitReport();
             break;
         case 4:
             R1.display();
@@ -548,5 +605,5 @@ void subMenuReportingSystem(ReportingSystem &R1){
         default:
             cout<<"\nInvalid choice\n"<<endl;
     }
-    }
+}
 }
