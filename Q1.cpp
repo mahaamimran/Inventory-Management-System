@@ -115,7 +115,7 @@ void InventoryManagement::productTake(){
     if(index != -1){
         cout << "Enter the updated quantity of the product: ";
         cin >> takenQuantity;
-        products[index].quantity -= takenQuantity;
+        products[index].quantity = takenQuantity;
         cout << "Enter the updated price of the product: ";
         cin >> takenPrice;
         products[index].price = takenPrice;
@@ -607,3 +607,46 @@ void subMenuReportingSystem(ReportingSystem &R1){
     }
 }
 }
+
+// EXAMPLE INPUT
+
+// 1 (invetory management)
+// 1 (product ordering)
+// 2 (product take)
+// Peas
+// 20 (quantity update)
+// 300.0 (price update)
+// 3 (price management)
+// 1 (update price)
+// Cake
+// 500
+// 4 (display)
+// -1 (exit inventory management)
+
+// 2 (point of sale)
+// 1 (add to cart)
+// 2 (amount of items to buy)
+// Bread
+// 4
+// Eggs
+// 12
+// 2 (apply discount)
+// 3 (issue refund)
+// Eggs
+// 3
+// 4 (display)
+// -1 (exit point of sale)
+
+// 3 (report generator)
+// 1 (sales report)
+// 1 (sales by product)
+// 1 (sales report)
+// 2 (sales by date)
+// 1 (sales report)
+// 3 (sales by customer)
+// 2 (inventory report)
+// 3 (profit report)
+// 4 (display products)
+// -1 (exit report generator)
+
+// -1 exit program
